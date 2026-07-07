@@ -1,1 +1,107 @@
-Short -in Sound Moo Krata AR
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>AR Moo Krata - Short Vowel 'in'</title>
+    <!-- นำเข้าไลบรารี AR -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    
+    <!-- นำเข้าฟอนต์ Itim จาก Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    
+    <style>
+      /* ตกแต่งป้ายคำศัพท์และปุ่มกดให้อยู่ด้านหน้าสุด */
+      .ui-container {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        text-align: center;
+        z-index: 999; /* ให้ลอยอยู่เหนือกล้อง AR */
+        font-family: 'Itim', cursive; /* เรียกใช้ฟอนต์ไอติม */
+      }
+      .word-box {
+        background-color: rgba(255, 255, 255, 0.95);
+        border: 5px solid #fca311; /* กรอบสีส้ม */
+        border-radius: 20px;
+        padding: 10px 20px;
+        font-size: 60px; /* ขนาดตัวอักษร */
+        color: #023047;
+        margin-bottom: 15px;
+        box-shadow: 0px 5px 15px rgba(0,0,0,0.3);
+      }
+      .btn {
+        background-color: #ffb703;
+        border: 3px solid #fb8500;
+        border-radius: 15px;
+        padding: 10px 30px;
+        font-size: 26px;
+        font-family: 'Itim', cursive;
+        color: #780000;
+        cursor: pointer;
+        box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
+        transition: 0.2s;
+      }
+      .btn:active { 
+        transform: scale(0.95); /* เอฟเฟกต์ตอนกดปุ่ม */
+      }
+    </style>
+  </head>
+  <body style="margin: 0; overflow: hidden;">
+    
+    <!-- ส่วนแสดงผล AR -->
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
+      <!-- ตั้งค่าให้โมเดลติดอยู่กับกล้องเลย เด็กๆ จะได้เห็นทันทีโดยไม่ต้องสแกน -->
+      <a-entity camera>
+        <a-entity position="0 -0.5 -3"> <!-- ตำแหน่ง X Y Z ของโมเดล -->
+          
+          <!-- ฐานเตาหมูกะทะ -->
+          <a-cylinder position="0 0 0" radius="1" height="0.3" color="#333333"></a-cylinder>
+          <a-torus position="0 0.15 0" radius="0.95" radius-tubular="0.05" color="#e5e5e5" rotation="90 0 0"></a-torus>
+          <!-- โดมย่างหมู -->
+          <a-sphere position="0 0.15 0" radius="0.8" scale="1 0.4 1" color="#fca311"></a-sphere>
+          
+          <!-- ไอศกรีม (ใส่หมุนรอบตัวเองอัตโนมัติ) -->
+          <a-entity position="0 1.2 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear">
+            <a-cone radius-bottom="0.25" radius-top="0" height="0.6" color="#ffb703" rotation="180 0 0"></a-cone>
+            <a-sphere position="0 0.35 0" radius="0.22" color="#8ecae6"></a-sphere>
+            <a-sphere position="0.1 0.3 0.1" radius="0.2" color="#ffb703"></a-sphere>
+            <a-sphere position="-0.1 0.3 0.1" radius="0.2" color="#fb8500"></a-sphere>
+          </a-entity>
+          
+        </a-entity>
+      </a-entity>
+    </a-scene>
+
+    <!-- ส่วน UI หน้าจอสัมผัส (ฟอนต์ Itim) -->
+    <div class="ui-container">
+      <div class="word-box" id="wordDisplay">bin</div>
+      <button class="btn" onclick="nextWord()">ถัดไป ➡️</button>
+    </div>
+
+    <!-- สคริปต์ควบคุมการเปลี่ยนคำศัพท์ -->
+    <script>
+      // รายการคำศัพท์ 15 คำ
+      const words = [
+        "bin", "pin", "tin", "win", "fin", 
+        "chin", "shin", "grin", "spin", "twin", 
+        "skin", "thin", "din", "kin", "in"
+      ];
+      let currentIndex = 0;
+
+      // ฟังก์ชันเมื่อกดปุ่ม "ถัดไป"
+      function nextWord() {
+        currentIndex++;
+        // ถ้ารันจนครบ 15 คำแล้ว ให้วนกลับมาคำแรกใหม่
+        if (currentIndex >= words.length) {
+          currentIndex = 0; 
+        }
+        // เปลี่ยนข้อความในกล่อง
+        document.getElementById("wordDisplay").innerText = words[currentIndex];
+      }
+    </script>
+    
+  </body>
+</html>
