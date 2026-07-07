@@ -1,107 +1,197 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>AR Moo Krata - Short Vowel 'in'</title>
-    <!-- นำเข้าไลบรารี AR -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+<head>
+  <meta charset="utf-8">
+  <title>Moo Krata AR - Short Vowel '-in'</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <!-- นำเข้าฟอนต์ Itim สำหรับทำ UI -->
+  <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+  
+  <style>
+    body { margin: 0; overflow: hidden; font-family: 'Itim', cursive; user-select: none; }
     
-    <!-- นำเข้าฟอนต์ Itim จาก Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
-    
-    <style>
-      /* ตกแต่งป้ายคำศัพท์และปุ่มกดให้อยู่ด้านหน้าสุด */
-      .ui-container {
-        position: absolute;
-        bottom: 30px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80%;
-        text-align: center;
-        z-index: 999; /* ให้ลอยอยู่เหนือกล้อง AR */
-        font-family: 'Itim', cursive; /* เรียกใช้ฟอนต์ไอติม */
-      }
-      .word-box {
-        background-color: rgba(255, 255, 255, 0.95);
-        border: 5px solid #fca311; /* กรอบสีส้ม */
-        border-radius: 20px;
-        padding: 10px 20px;
-        font-size: 60px; /* ขนาดตัวอักษร */
-        color: #023047;
-        margin-bottom: 15px;
-        box-shadow: 0px 5px 15px rgba(0,0,0,0.3);
-      }
-      .btn {
-        background-color: #ffb703;
-        border: 3px solid #fb8500;
-        border-radius: 15px;
-        padding: 10px 30px;
-        font-size: 26px;
-        font-family: 'Itim', cursive;
-        color: #780000;
-        cursor: pointer;
-        box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
-        transition: 0.2s;
-      }
-      .btn:active { 
-        transform: scale(0.95); /* เอฟเฟกต์ตอนกดปุ่ม */
-      }
-    </style>
-  </head>
-  <body style="margin: 0; overflow: hidden;">
-    
-    <!-- ส่วนแสดงผล AR -->
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
-      <!-- ตั้งค่าให้โมเดลติดอยู่กับกล้องเลย เด็กๆ จะได้เห็นทันทีโดยไม่ต้องสแกน -->
-      <a-entity camera>
-        <a-entity position="0 -0.5 -3"> <!-- ตำแหน่ง X Y Z ของโมเดล -->
-          
-          <!-- ฐานเตาหมูกะทะ -->
-          <a-cylinder position="0 0 0" radius="1" height="0.3" color="#333333"></a-cylinder>
-          <a-torus position="0 0.15 0" radius="0.95" radius-tubular="0.05" color="#e5e5e5" rotation="90 0 0"></a-torus>
-          <!-- โดมย่างหมู -->
-          <a-sphere position="0 0.15 0" radius="0.8" scale="1 0.4 1" color="#fca311"></a-sphere>
-          
-          <!-- ไอศกรีม (ใส่หมุนรอบตัวเองอัตโนมัติ) -->
-          <a-entity position="0 1.2 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear">
-            <a-cone radius-bottom="0.25" radius-top="0" height="0.6" color="#ffb703" rotation="180 0 0"></a-cone>
-            <a-sphere position="0 0.35 0" radius="0.22" color="#8ecae6"></a-sphere>
-            <a-sphere position="0.1 0.3 0.1" radius="0.2" color="#ffb703"></a-sphere>
-            <a-sphere position="-0.1 0.3 0.1" radius="0.2" color="#fb8500"></a-sphere>
-          </a-entity>
-          
-        </a-entity>
-      </a-entity>
-    </a-scene>
+    #ui-layer {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 10; display: flex; flex-direction: column; justify-content: space-between;
+    }
 
-    <!-- ส่วน UI หน้าจอสัมผัส (ฟอนต์ Itim) -->
-    <div class="ui-container">
-      <div class="word-box" id="wordDisplay">bin</div>
-      <button class="btn" onclick="nextWord()">ถัดไป ➡️</button>
+    .header {
+      display: flex; justify-content: space-between; padding: 20px;
+      font-size: 30px; color: #ffb703; text-shadow: 2px 2px 4px #000;
+    }
+
+    .box { background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 15px; border: 2px solid #ffb703; }
+
+    #overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.85); z-index: 20;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      color: white; pointer-events: auto; text-align: center;
+    }
+    
+    h1 { color: #fca311; font-size: 50px; margin: 10px; }
+    p { font-size: 24px; margin-bottom: 30px; }
+    
+    button {
+      font-family: 'Itim', cursive; font-size: 30px; padding: 15px 40px;
+      background-color: #fb8500; color: white; border: none; border-radius: 30px;
+      cursor: pointer; box-shadow: 0 5px 15px rgba(251, 133, 0, 0.4); transition: 0.2s;
+    }
+    button:active { transform: scale(0.95); }
+  </style>
+</head>
+<body>
+
+  <!-- UI แสดงคะแนนและเวลา -->
+  <div id="ui-layer">
+    <div class="header">
+      <div class="box">⭐ คะแนน: <span id="score">0</span></div>
+      <div class="box">⏱️ เวลา: <span id="timer">40</span>s</div>
     </div>
+  </div>
 
-    <!-- สคริปต์ควบคุมการเปลี่ยนคำศัพท์ -->
-    <script>
-      // รายการคำศัพท์ 15 คำ
-      const words = [
-        "bin", "pin", "tin", "win", "fin", 
-        "chin", "shin", "grin", "spin", "twin", 
-        "skin", "thin", "din", "kin", "in"
-      ];
-      let currentIndex = 0;
+  <!-- หน้าจอเริ่ม/จบเกม -->
+  <div id="overlay">
+    <h1 id="titleText">หมูกะทะ AR วิ่งสู้ฟัด!</h1>
+    <p id="subText">ใช้นิ้วจิ้มส่วนผสมที่มีคำศัพท์ลงท้ายด้วยเสียง <b>-in</b> เท่านั้น!</p>
+    <button onclick="startGame()" id="startBtn">เริ่มเกมเลย!</button>
+  </div>
 
-      // ฟังก์ชันเมื่อกดปุ่ม "ถัดไป"
-      function nextWord() {
-        currentIndex++;
-        // ถ้ารันจนครบ 15 คำแล้ว ให้วนกลับมาคำแรกใหม่
-        if (currentIndex >= words.length) {
-          currentIndex = 0; 
-        }
-        // เปลี่ยนข้อความในกล่อง
-        document.getElementById("wordDisplay").innerText = words[currentIndex];
-      }
-    </script>
+  <!-- ฉาก AR -->
+  <a-scene embedded vr-mode-ui="enabled: false" cursor="rayOrigin: mouse" raycaster="objects: .clickable">
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <!-- คอนเทนเนอร์สำหรับใส่ของกินที่จะลอยขึ้นมา -->
+    <a-entity id="food-container"></a-entity>
+  </a-scene>
+
+  <script>
+    // --- ตั้งค่าคำศัพท์ ---
+    const correctWords = ["bin", "pin", "tin", "win", "fin", "chin", "shin", "grin", "spin", "twin"];
+    const wrongWords = ["bat", "cat", "dog", "sun", "map", "pen", "red", "top", "hot", "cup"];
     
-  </body>
+    // --- ใส่ชื่อไฟล์รูปภาพของคุณ (ต้องอยู่ในโฟลเดอร์เดียวกับ index.html) ---
+    const foodImages = [
+      "Gemini_Generated_Image_nxkn66nxkn66nxkn.jpg", // หมู
+      "Gemini_Generated_Image_rf5o71rf5o71rf5o.jpg", // เบคอน
+      "Gemini_Generated_Image_36wef336wef336we.jpg", // กะหล่ำปลี
+      "Gemini_Generated_Image_26l65a26l65a26l6.jpg", // เห็ด
+      "Gemini_Generated_Image_x238pkx238pkx238.jpg", // ข้าวโพด
+      "Gemini_Generated_Image_e5y1z0e5y1z0e5y1.jpg", // แครอท
+      "Gemini_Generated_Image_u2o6mzu2o6mzu2o6.jpg"  // ผักกาด
+    ];
+
+    let score = 0;
+    let timeLeft = 40;
+    let gameInterval;
+    let spawnInterval;
+    let isPlaying = false;
+
+    // ระบบเริ่มเกม
+    function startGame() {
+      document.getElementById('overlay').style.display = 'none';
+      score = 0;
+      timeLeft = 40;
+      updateUI();
+      isPlaying = true;
+      document.getElementById('food-container').innerHTML = '';
+
+      // นับเวลาถอยหลัง 40 วินาที
+      gameInterval = setInterval(() => {
+        timeLeft--;
+        updateUI();
+        if (timeLeft <= 0) endGame();
+      }, 1000);
+
+      // สร้างของกินลอยขึ้นมาทุกๆ 1.2 วินาที
+      spawnInterval = setInterval(spawnFood, 1200);
+    }
+
+    // ระบบจบเกม
+    function endGame() {
+      isPlaying = false;
+      clearInterval(gameInterval);
+      clearInterval(spawnInterval);
+      
+      let overlay = document.getElementById('overlay');
+      overlay.style.display = 'flex';
+      document.getElementById('titleText').innerText = "หมดเวลา!";
+      document.getElementById('subText').innerHTML = `นักเรียนได้คะแนนทั้งหมด <b>${score}</b> คะแนน 🎉`;
+      document.getElementById('startBtn').innerText = "เล่นอีกครั้ง";
+    }
+
+    // อัปเดตตัวเลข
+    function updateUI() {
+      document.getElementById('score').innerText = score;
+      document.getElementById('timer').innerText = timeLeft;
+    }
+
+    // ฟังก์ชันสร้างของกินลอยขึ้นมา
+    function spawnFood() {
+      if (!isPlaying) return;
+
+      const container = document.getElementById('food-container');
+      const el = document.createElement('a-entity');
+      
+      const isCorrect = Math.random() > 0.4; // โอกาส 60% เป็นคำที่ถูกต้อง
+      const wordList = isCorrect ? correctWords : wrongWords;
+      const word = wordList[Math.floor(Math.random() * wordList.length)];
+      const imgUrl = foodImages[Math.floor(Math.random() * foodImages.length)];
+
+      // สุ่มตำแหน่งลอยขึ้น (X=ซ้ายขวา, Y=ล่างจอ, Z=ระยะห่างจากกล้อง)
+      const startX = (Math.random() - 0.5) * 5; 
+      const startY = -4;
+      const startZ = -4 - Math.random() * 2; 
+      
+      el.setAttribute('position', `${startX} ${startY} ${startZ}`);
+      el.setAttribute('class', 'clickable'); // ทำให้ออบเจกต์จิ้มได้
+
+      // ใส่รูปภาพอาหาร
+      const imageEl = document.createElement('a-image');
+      imageEl.setAttribute('src', imgUrl);
+      imageEl.setAttribute('width', '1.5');
+      imageEl.setAttribute('height', '1.5');
+      
+      // ใส่ป้ายคำศัพท์
+      const textEl = document.createElement('a-text');
+      textEl.setAttribute('value', word);
+      textEl.setAttribute('align', 'center');
+      textEl.setAttribute('position', '0 -1.0 0.1');
+      textEl.setAttribute('scale', '2 2 2');
+      textEl.setAttribute('color', '#ffffff');
+      
+      // พื้นหลังป้ายคำศัพท์
+      const bgEl = document.createElement('a-plane');
+      bgEl.setAttribute('color', '#d90429');
+      bgEl.setAttribute('width', '1.5');
+      bgEl.setAttribute('height', '0.6');
+      bgEl.setAttribute('position', '0 -1.0 0');
+      bgEl.setAttribute('opacity', '0.9');
+
+      el.appendChild(imageEl);
+      el.appendChild(bgEl);
+      el.appendChild(textEl);
+
+      // แอนิเมชันลอยขึ้นด้านบนจอ
+      el.setAttribute('animation', `property: position; to: ${startX} 5 ${startZ}; dur: 5000; easing: linear`);
+
+      // ตรวจจับการกด (Tap)
+      el.addEventListener('click', function() {
+        if (isCorrect) {
+          score += 10; // ถูก ได้ 10 คะแนน
+        } else {
+          score -= 5; // ผิด โดนหัก 5 คะแนน
+        }
+        updateUI();
+        if(el.parentNode) el.parentNode.removeChild(el); // กดแล้วหายไป
+      });
+
+      // ลบทิ้งเมื่อลอยพ้นจอ
+      setTimeout(() => {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }, 5000);
+
+      container.appendChild(el);
+    }
+  </script>
+</body>
 </html>
